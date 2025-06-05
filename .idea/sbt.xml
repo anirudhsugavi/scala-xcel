@@ -19,7 +19,7 @@
           </set>
         </option>
         <option name="resolveSbtClassifiers" value="true" />
-        <option name="sbtVersion" value="1.10.10" />
+        <option name="sbtVersion" value="1.11.0" />
         <option name="separateProdAndTestSources" value="true" />
         <option name="useSbtShellForBuild" value="true" />
         <option name="useSbtShellForImport" value="true" />

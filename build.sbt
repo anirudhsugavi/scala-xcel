@@ -1,3 +1,5 @@
+import java.lang.management.ManagementFactory
+
 ThisBuild / scalaVersion := "3.3.6"
 
 ThisBuild / organization := "com.sugavi"
@@ -30,7 +32,10 @@ lazy val `scala-excel` = project
   .aggregate(model, xcel)
   .settings(
     name           := "scala-excel",
-    publish / skip := true
+    publish / skip := true,
+    Test / fork    := !isDebug
   )
 
 enablePlugins(ScalafmtPlugin)
+
+def isDebug: Boolean = ManagementFactory.getRuntimeMXBean.getInputArguments.contains("-Xdebug")
