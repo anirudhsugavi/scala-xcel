@@ -10,7 +10,7 @@ import java.time.{LocalDate, LocalDateTime}
 
 class ConversionsSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
 
-  "Scala to Xcel" should "scala primitives to Xcel" in {
+  "2 way conversions" should "test scala <-> xcel data conversions" in {
     forAll {
       (
         str: String,
