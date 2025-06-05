@@ -1,16 +1,20 @@
 package com.sugavi.conversions
 
+import com.sugavi.xcel.mappers.Mappers
 import com.sugavi.xcel.model.*
-import com.sugavi.xcel.syntax.{*, given}
+import com.sugavi.xcel.syntax.given
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import java.time.{LocalDate, LocalDateTime}
+import scala.language.implicitConversions
 
 class ConversionsSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
 
   "2 way conversions" should "test scala <-> xcel data conversions" in {
+    val sheet = Mappers.deriveSheet(User("ani", 32))
+    println(sheet)
     forAll {
       (
         str: String,
@@ -43,7 +47,12 @@ class ConversionsSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           val dateTime1: LocalDateTime = dateTimeX
           val optStr1: Option[String]  = optStrX
           val optDob1: Option[Double]  = optDobX
+
+          val iS = Cell("hello")
+          val iC = Cell(123)
         }
     }
   }
 }
+
+case class User(name: String, age: Int)

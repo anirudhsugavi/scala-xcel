@@ -9,10 +9,10 @@ sealed trait Workbook extends Product with Serializable
 case class Sheet(
   name: String,
   header: Option[Row],
-  rows: IndexedSeq[Row]
+  rows: Seq[Row]
 ) extends Workbook
 
-case class Row(cells: IndexedSeq[Cell])
+case class Row(cells: Seq[Cell])
 
 case class Cell(value: XcelValue)
 

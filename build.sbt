@@ -23,7 +23,7 @@ lazy val xcel = project
       "org.apache.poi"     % "poi-ooxml"       % "5.4.1",
       "org.scalatest"     %% "scalatest"       % "3.2.19"   % Test,
       "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0" % Test
-    )
+    ),
   )
   .dependsOn(model)
 
