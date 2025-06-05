@@ -43,6 +43,9 @@ trait BijectionImplicits extends Implicits {
       case xv        => Some(bij.bToA(xv.asInstanceOf[B]))
     }
   )
+
+  given bijectionToConversion[A, B](using bij: Bijection[A, B]): Conversion[A, B]   = bij.aToB
+  given bijectionFromConversion[A, B](using bij: Bijection[A, B]): Conversion[B, A] = bij.bToA
 }
 
 object BijectionImplicits extends BijectionImplicits

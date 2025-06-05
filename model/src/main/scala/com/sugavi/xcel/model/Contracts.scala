@@ -12,9 +12,9 @@ case class Sheet(
   rows: Seq[Row]
 ) extends Workbook
 
-case class Row(cells: Seq[Cell[_]])
+case class Row(cells: Seq[Cell])
 
-case class Cell[T](value: T)
+case class Cell(value: XcelValue)
 
 sealed trait XcelValue
 

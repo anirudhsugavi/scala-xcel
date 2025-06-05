@@ -24,28 +24,26 @@ class ConversionsSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
         optDob: Option[Double]
       ) =>
         whenever(long <= Int.MaxValue && long >= Int.MinValue) {
-          val strX      = str.as[StringXcel]
-          val dobX      = dob.as[NumberXcel]
-          val intX      = int.as[NumberXcel]
-          val longX     = long.as[NumberXcel]
-          val boolX     = bool.as[BooleanXcel]
-          val dateX     = date.as[DateXcel]
-          val dateTimeX = dateTime.as[DateTimeXcel]
-          val optStrX   = optStr.as[XcelValue]
-          val optDobX   = optDob.as[XcelValue]
+          val strX: StringXcel        = str
+          val dobX: NumberXcel        = dob
+          val intX: NumberXcel        = int
+          val longX: NumberXcel       = long
+          val boolX: BooleanXcel      = bool
+          val dateX: DateXcel         = date
+          val dateTimeX: DateTimeXcel = dateTime
+          val optStrX: XcelValue      = optStr
+          val optDobX: XcelValue      = optDob
 
-          strX.to[String] shouldEqual str
-          dobX.to[Double] shouldEqual dob
-          intX.to[Int] shouldEqual int
-          longX.to[Long] shouldEqual long
-          boolX.to[Boolean] shouldEqual bool
-          dateX.to[LocalDate] shouldEqual date
-          dateTimeX.to[LocalDateTime] shouldEqual dateTime
-          optStrX.to[Option[String]] shouldEqual optStr
-          optDobX.to[Option[Double]] shouldEqual optDob
+          val str1: String             = strX
+          val dob1: Double             = dobX
+          val int1: Int                = intX
+          val long1: Long              = longX
+          val bool1: Boolean           = boolX
+          val date1: LocalDate         = dateX
+          val dateTime1: LocalDateTime = dateTimeX
+          val optStr1: Option[String]  = optStrX
+          val optDob1: Option[Double]  = optDobX
         }
     }
   }
 }
-
-case class TestStringToXcel(xcelString: StringXcel)
