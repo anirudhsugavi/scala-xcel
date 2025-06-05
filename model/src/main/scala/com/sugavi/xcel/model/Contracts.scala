@@ -4,19 +4,19 @@ import java.time.{LocalDate, LocalDateTime}
 
 class Contracts
 
-sealed trait Workbook
+sealed trait Workbook extends Product with Serializable
 
 case class Sheet(
   name: String,
   header: Option[Row],
-  rows: Seq[Row]
+  rows: IndexedSeq[Row]
 ) extends Workbook
 
-case class Row(cells: Seq[Cell])
+case class Row(cells: IndexedSeq[Cell])
 
 case class Cell(value: XcelValue)
 
-sealed trait XcelValue
+sealed trait XcelValue extends Product with Serializable
 
 case class StringXcel(value: String)          extends XcelValue
 case class NumberXcel(value: Double)          extends XcelValue
