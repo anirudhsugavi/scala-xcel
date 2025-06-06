@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFWorkbook}
 
 import java.time.{LocalDate, LocalDateTime}
+import scala.annotation.tailrec
 
 object XSSFXcelHandler {
 
@@ -39,6 +40,7 @@ object XSSFXcelHandler {
 
     workbook
 
+  @tailrec
   private def setPoiCellValue(
     poiCell: XSSFCell,
     cell: Cell[_],
