@@ -10,6 +10,7 @@ trait Bijection[A, B] {
 }
 
 object Bijection {
+
   def apply[A, B](ab: A => B, ba: B => A): Bijection[A, B] = new Bijection[A, B] {
     override def aToB(a: A): B = ab(a)
     override def bToA(b: B): A = ba(b)
@@ -36,6 +37,7 @@ trait BijectionImplicits extends Implicits {
     a => bij.aToB(a),
     b => bij.bToA(b.asInstanceOf[B])
   )
+
   given optionToXcel[A, B <: XcelValue](using bij: Bijection[A, B]): Bijection[Option[A], XcelValue] = Bijection(
     ab = _.map(bij.aToB).getOrElse(EmptyXcel),
     ba = {
