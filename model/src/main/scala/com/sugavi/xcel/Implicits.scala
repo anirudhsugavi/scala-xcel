@@ -46,16 +46,6 @@ trait BijectionImplicits extends Implicits {
     }
   )
 
-  given [A]: Bijection[A, XcelVal[A]] = Bijection(XcelVal.apply, _.value)
-
-  given [A](using bij: Bijection[A, XcelVal[A]]): Bijection[Option[A], XcelDataType[A]] = Bijection(
-    ab = _.map(bij.aToB).getOrElse(EmptyX),
-    ba = {
-      case EmptyX      => None
-      case XcelVal(xv) => Some(bij.bToA(xv))
-    }
-  )
-
   given bijectionToConversion[A, B](using bij: Bijection[A, B]): Conversion[A, B]   = bij.aToB
   given bijectionFromConversion[A, B](using bij: Bijection[A, B]): Conversion[B, A] = bij.bToA
 }

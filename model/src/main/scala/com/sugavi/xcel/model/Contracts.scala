@@ -14,7 +14,7 @@ case class Sheet(
 
 case class Row(cells: Seq[Cell[_]])
 
-case class Cell[T](value: XcelVal[T])
+case class Cell[T](value: T)
 
 sealed trait XcelValue extends Product with Serializable
 
@@ -24,8 +24,3 @@ case class BooleanXcel(value: Boolean)        extends XcelValue
 case class DateXcel(value: LocalDate)         extends XcelValue
 case class DateTimeXcel(value: LocalDateTime) extends XcelValue
 case object EmptyXcel                         extends XcelValue
-
-sealed trait XcelDataType[+A] extends Product with Serializable
-
-case class XcelVal[A](value: A) extends XcelDataType[A]
-case object EmptyX              extends XcelDataType[Nothing]

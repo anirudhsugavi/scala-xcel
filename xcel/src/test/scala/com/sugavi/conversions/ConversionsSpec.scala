@@ -50,9 +50,6 @@ class ConversionsSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           val dateTime1: LocalDateTime = dateTimeX
           val optStr1: Option[String]  = optStrX
           val optDob1: Option[Double]  = optDobX
-
-          val iS = Cell("hello")
-          val iC = Cell(123)
         }
     }
   }

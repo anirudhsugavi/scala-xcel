@@ -21,7 +21,7 @@ object Mappers {
     else {
       val headerCells: Seq[Expr[Cell[String]]] = fields.map { f =>
         val name = Expr(f.name)
-        '{ Cell(XcelVal($name)) }
+        '{ Cell($name) }
       }
       val headerExpr = '{ Row(${ Expr.ofSeq(headerCells) }) }
 
@@ -30,7 +30,7 @@ object Mappers {
           Expr.ofSeq(
             fields.map { f =>
               val fieldVal = Select.unique('record.asTerm, f.name).asExpr
-              '{ Cell(XcelVal($fieldVal)) }
+              '{ Cell($fieldVal) }
             }
           )
         }
