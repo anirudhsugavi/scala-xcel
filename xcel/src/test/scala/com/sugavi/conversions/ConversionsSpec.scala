@@ -13,7 +13,10 @@ import scala.language.implicitConversions
 class ConversionsSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
 
   "2 way conversions" should "test scala <-> xcel data conversions" in {
-    val sheet = Mappers.deriveSheet(User("ani", 32))
+    val sheet = Mappers.deriveSheet(Seq(User("ani", Some(32)), User("ana", None)))
+    // val sheet = Mappers.deriveSheet(Seq(User("ani", 32), User("ana", 28)))
+    def getUsers: Seq[User] = Seq.empty
+    println(Mappers.deriveSheet(getUsers))
     println(sheet)
     forAll {
       (
@@ -55,4 +58,4 @@ class ConversionsSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
   }
 }
 
-case class User(name: String, age: Int)
+case class User(name: String, age: Option[Int])

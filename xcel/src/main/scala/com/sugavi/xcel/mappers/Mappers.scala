@@ -2,58 +2,43 @@ package com.sugavi.xcel.mappers
 
 import com.sugavi.xcel.model.*
 
-import java.time.{LocalDate, LocalDateTime}
 import scala.quoted.*
 
 object Mappers {
-  inline def deriveSheet[A](a: A): Sheet = ${ deriveSheetImpl('a) }
+  inline def deriveSheet[A](records: Seq[A]): Sheet = ${ deriveSheetImpl('records) }
 
-  private def deriveSheetImpl[A: Type](exp: Expr[A])(using Quotes): Expr[Sheet] = {
+  private def deriveSheetImpl[A: Type](recordsExpr: Expr[Seq[A]])(using Quotes): Expr[Sheet] = {
     import quotes.reflect.*
-    import com.sugavi.xcel.syntax.given
 
     val tpe           = TypeRepr.of[A]
     val fields        = tpe.typeSymbol.caseFields
     val classNameExpr = Expr(tpe.typeSymbol.name)
 
-    val cells: Seq[Expr[Cell]] = fields.map { f =>
-      val name    = Expr(f.name)
-      val nameExp = '{ summon[Conversion[String, XcelValue]].apply($name) }
-      '{ Cell($nameExp) }
+    val headerCells: Seq[Expr[Cell[String]]] = fields.map { f =>
+      val name = Expr(f.name)
+      '{ Cell(XcelVal($name)) }
     }
-    val headerExpr = '{ Row(${ Expr.ofSeq(cells) }) }
+    val headerExpr = '{ Row(${ Expr.ofSeq(headerCells) }) }
 
-    val cellVals = fields.map { f =>
-      val fieldTpe  = tpe.memberType(f)
-      val fieldName = f.name
-      val fieldVal  = Select.unique(exp.asTerm, fieldName).asExpr
-
-      fieldTpe.asType match {
-        case '[String] =>
-          '{ Cell(summon[Conversion[String, XcelValue]].apply($fieldVal.asInstanceOf[String])) }
-        case '[Double] =>
-          '{ Cell(summon[Conversion[Double, XcelValue]].apply($fieldVal.asInstanceOf[Double])) }
-        case '[Int] =>
-          '{ Cell(summon[Conversion[Int, XcelValue]].apply($fieldVal.asInstanceOf[Int])) }
-        case '[Long] =>
-          '{ Cell(summon[Conversion[Long, XcelValue]].apply($fieldVal.asInstanceOf[Long])) }
-        case '[Boolean] =>
-          '{ Cell(summon[Conversion[Boolean, XcelValue]].apply($fieldVal.asInstanceOf[Boolean])) }
-        case '[LocalDate] =>
-          '{ Cell(summon[Conversion[LocalDate, XcelValue]].apply($fieldVal.asInstanceOf[LocalDate])) }
-        case '[LocalDateTime] =>
-          '{ Cell(summon[Conversion[LocalDateTime, XcelValue]].apply($fieldVal.asInstanceOf[LocalDateTime])) }
-        case _ =>
-          report.errorAndAbort(s"Unsupported type: ${fieldTpe.show} for field: $fieldName.")
+    val rowMapper: Expr[A => Row] = '{ (record: A) =>
+      val cells: Seq[Cell[_]] = ${
+        Expr.ofSeq(
+          fields.map { f =>
+            val fieldVal = Select.unique('record.asTerm, f.name).asExpr
+            '{ Cell(XcelVal($fieldVal)) }
+          }
+        )
       }
+      Row(cells)
     }
-    val rowExpr = '{ Row(${ Expr.ofSeq(cellVals) }) }
+
+    val rowsExpr: Expr[Seq[Row]] = '{ $recordsExpr.map($rowMapper) }
 
     '{
       Sheet(
         name = $classNameExpr,
         header = Some($headerExpr),
-        rows = Seq($rowExpr)
+        rows = $rowsExpr
       )
     }
   }
