@@ -31,7 +31,7 @@ lazy val `scala-excel` = project
   .in(file("."))
   .aggregate(model, xcel)
   .settings(
-    name           := "scala-excel",
+    name           := "scala-xcel",
     publish / skip := true,
     Test / fork    := !isDebug
   )
