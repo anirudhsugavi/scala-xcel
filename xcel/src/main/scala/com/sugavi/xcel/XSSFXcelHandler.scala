@@ -40,39 +40,34 @@ object XSSFXcelHandler {
 
     workbook
 
-  @tailrec
   private def setPoiCellValue(
     poiCell: XSSFCell,
-    cell: Cell[_],
+    cell: Cell,
     numericStyle: CellStyle,
     dateStyle: CellStyle,
     dateTimeStyle: CellStyle
   ): Unit =
     cell.value match
-      case s: String =>
+      case StringXcel(s) =>
         poiCell.setCellValue(s)
-      case n: Int =>
-        poiCell.setCellValue(n.toString)
+      case IntXcel(i) =>
+        poiCell.setCellValue(i.toString)
         poiCell.setCellStyle(numericStyle)
-      case l: Long =>
+      case LongXcel(l) =>
         poiCell.setCellValue(l.toString)
         poiCell.setCellStyle(numericStyle)
-      case d: Double =>
+      case DoubleXcel(d) =>
         poiCell.setCellValue(d)
-      case b: Boolean =>
+      case BooleanXcel(b) =>
         poiCell.setCellValue(b)
-      case d: LocalDate =>
+      case DateXcel(d) =>
         poiCell.setCellValue(d)
         poiCell.setCellStyle(dateStyle)
-      case dt: LocalDateTime =>
+      case DateTimeXcel(dt) =>
         poiCell.setCellValue(dt)
         poiCell.setCellStyle(dateTimeStyle)
-      case Some(op) =>
-        setPoiCellValue(poiCell, Cell(op), numericStyle, dateStyle, dateTimeStyle)
-      case None =>
+      case EmptyXcel =>
         poiCell.setBlank()
-      case _ =>
-        throw new IllegalArgumentException(s"Unsupported cell value type: ${cell.value.getClass.getName}")
 
   private def getNumericCellStyle(workbook: XSSFWorkbook): CellStyle =
     val style  = workbook.createCellStyle()
