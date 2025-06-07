@@ -25,13 +25,28 @@ final class IdentityBijection[A] extends Bijection[A, A] {
 trait Implicits
 
 trait BijectionImplicits extends Implicits {
-  given Bijection[String, XcelValue]        = Bijection(StringXcel.apply, _.asInstanceOf[StringXcel].value)
-  given Bijection[Double, XcelValue]        = Bijection(DoubleXcel.apply, _.asInstanceOf[DoubleXcel].value)
-  given Bijection[Int, XcelValue]           = Bijection(IntXcel.apply, _.asInstanceOf[IntXcel].value)
-  given Bijection[Long, XcelValue]          = Bijection(LongXcel.apply, _.asInstanceOf[LongXcel].value)
-  given Bijection[Boolean, XcelValue]       = Bijection(BooleanXcel.apply, _.asInstanceOf[BooleanXcel].value)
-  given Bijection[LocalDate, XcelValue]     = Bijection(DateXcel.apply, _.asInstanceOf[DateXcel].value)
-  given Bijection[LocalDateTime, XcelValue] = Bijection(DateTimeXcel.apply, _.asInstanceOf[DateTimeXcel].value)
+
+  given [A]: Bijection[A, XcelValue] = Bijection(
+    ab = {
+      case s: String          => StringXcel(s)
+      case d: Double          => DoubleXcel(d)
+      case i: Int             => IntXcel(i)
+      case l: Long            => LongXcel(l)
+      case b: Boolean         => BooleanXcel(b)
+      case ld: LocalDate      => DateXcel(ld)
+      case ldt: LocalDateTime => DateTimeXcel(ldt)
+    },
+    ba = {
+      case StringXcel(v)   => v.asInstanceOf[A]
+      case DoubleXcel(v)   => v.asInstanceOf[A]
+      case IntXcel(v)      => v.asInstanceOf[A]
+      case LongXcel(v)     => v.asInstanceOf[A]
+      case BooleanXcel(v)  => v.asInstanceOf[A]
+      case DateXcel(v)     => v.asInstanceOf[A]
+      case DateTimeXcel(v) => v.asInstanceOf[A]
+      case EmptyXcel       => None.asInstanceOf[A]
+    }
+  )
 
   given [A](using bij: Bijection[A, XcelValue]): Bijection[Option[A], XcelValue] = Bijection(
     ab = _.map(bij.aToB).getOrElse(EmptyXcel),
@@ -41,10 +56,8 @@ trait BijectionImplicits extends Implicits {
     }
   )
 
-  given [A](using bij: Bijection[A, XcelValue]): Conversion[A, XcelValue]                 = bij.aToB
-  given [A](using bij: Bijection[A, XcelValue]): Conversion[XcelValue, A]                 = bij.bToA
-  given [A](using bij: Bijection[Option[A], XcelValue]): Conversion[Option[A], XcelValue] = bij.aToB
-  given [A](using bij: Bijection[Option[A], XcelValue]): Conversion[XcelValue, Option[A]] = bij.bToA
+  given [A](using bij: Bijection[A, XcelValue]): Conversion[A, XcelValue] = bij.aToB
+  given [A](using bij: Bijection[A, XcelValue]): Conversion[XcelValue, A] = bij.bToA
 }
 
 object BijectionImplicits extends BijectionImplicits
