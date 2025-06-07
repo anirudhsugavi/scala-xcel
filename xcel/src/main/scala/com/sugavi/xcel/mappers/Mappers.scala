@@ -3,12 +3,31 @@ package com.sugavi.xcel.mappers
 import com.sugavi.xcel.model.*
 
 import java.time.{LocalDate, LocalDateTime}
+import scala.annotation.tailrec
 import scala.quoted.*
 
 object Mappers {
+
   inline def deriveSheet[A](records: Seq[A]): Sheet = ${ deriveSheetImpl('records) }
 
-  private def deriveSheetImpl[A: Type](recordsExpr: Expr[Seq[A]])(using Quotes): Expr[Sheet] = {
+  private def deriveSheetImpl[A: Type](recordsExpr: Expr[Seq[A]])(using Quotes): Expr[Sheet] =
+    import quotes.reflect.*
+
+    val tpe           = TypeRepr.of[A]
+    val sym           = tpe.typeSymbol
+    val fields        = sym.caseFields
+    val classNameExpr = Expr(sym.name)
+    '{
+      if $recordsExpr.isEmpty then Sheet(name = $classNameExpr, header = None, rows = Seq.empty)
+      else
+        val header = deriveHeader($recordsExpr.head)
+        val rows   = $recordsExpr.map(deriveRow)
+        Sheet(name = $classNameExpr, header = Some(header), rows = rows)
+    }
+
+  private inline def deriveHeader[A](record: A): Row = ${ deriveHeaderImpl('record) }
+
+  private def deriveHeaderImpl[A: Type](recordExpr: Expr[A])(using Quotes): Expr[Row] = {
     import quotes.reflect.*
     import com.sugavi.xcel.syntax.given
 
@@ -17,95 +36,72 @@ object Mappers {
     val fields        = sym.caseFields
     val classNameExpr = Expr(sym.name)
 
+    @tailrec
+    def isSupportedType(t: TypeRepr): Boolean =
+      t match
+        case _ if t =:= TypeRepr.of[String]        => true
+        case _ if t =:= TypeRepr.of[Double]        => true
+        case _ if t =:= TypeRepr.of[Int]           => true
+        case _ if t =:= TypeRepr.of[Long]          => true
+        case _ if t =:= TypeRepr.of[Boolean]       => true
+        case _ if t =:= TypeRepr.of[LocalDate]     => true
+        case _ if t =:= TypeRepr.of[LocalDateTime] => true
+        case _ if t <:< TypeRepr.of[Option[_]]     => isSupportedType(t.typeArgs.head)
+        case _                                     => false
+
+    def requireOnlySupportedFields(): Expr[Unit] =
+      val unsupportedTypes = fields.filterNot(f => isSupportedType(tpe.memberType(f)))
+      if unsupportedTypes.isEmpty then '{}
+      else
+        val unsupported = unsupportedTypes
+          .map(u => u.name -> tpe.memberType(u))
+          .map(ut => s"${ut._1}: ${ut._2.show}")
+          .mkString("[", ", ", "]")
+        report.errorAndAbort(s"Unsupported field types: $unsupported")
+
+    requireOnlySupportedFields()
+
     val headerCells: Seq[Expr[Cell]] = fields.map { f =>
-      val name      = Expr(f.name)
-      val converted = '{ summon[Conversion[String, XcelValue]].apply($name) }
-      '{ Cell($converted) }
-    }
-    val headerExpr = '{ Row(${ Expr.ofSeq(headerCells) }) }
-
-    val rowMapper: Expr[A => Row] = '{ (record: A) =>
-      val cells: Seq[Cell] = ${
-        Expr.ofSeq(
-          fields.map { f =>
-            val fieldVal = Select.unique('record.asTerm, f.name).asExpr
-            tpe.memberType(f).asType match
-              case '[String] =>
-                val converted = '{ summon[Conversion[String, XcelValue]].apply($fieldVal.asInstanceOf[String]) }
-                '{ Cell($converted) }
-              case '[Double] =>
-                val converted = '{ summon[Conversion[Double, XcelValue]].apply($fieldVal.asInstanceOf[Double]) }
-                '{ Cell($converted) }
-              case '[Int] =>
-                val converted = '{ summon[Conversion[Int, XcelValue]].apply($fieldVal.asInstanceOf[Int]) }
-                '{ Cell($converted) }
-              case '[Long] =>
-                val converted = '{ summon[Conversion[Long, XcelValue]].apply($fieldVal.asInstanceOf[Long]) }
-                '{ Cell($converted) }
-              case '[Boolean] =>
-                val converted = '{ summon[Conversion[Boolean, XcelValue]].apply($fieldVal.asInstanceOf[Boolean]) }
-                '{ Cell($converted) }
-              case '[LocalDate] =>
-                val converted = '{ summon[Conversion[LocalDate, XcelValue]].apply($fieldVal.asInstanceOf[LocalDate]) }
-                '{ Cell($converted) }
-              case '[LocalDateTime] =>
-                val converted = '{
-                  summon[Conversion[LocalDateTime, XcelValue]].apply($fieldVal.asInstanceOf[LocalDateTime])
-                }
-                '{ Cell($converted) }
-              case '[Option[String]] =>
-                '{
-                  Cell(summon[Conversion[Option[String], XcelValue]].apply($fieldVal.asInstanceOf[Option[String]]))
-                }
-              case '[Option[Double]] =>
-                '{
-                  Cell(summon[Conversion[Option[Double], XcelValue]].apply($fieldVal.asInstanceOf[Option[Double]]))
-                }
-              case '[Option[Int]] =>
-                '{
-                  Cell(summon[Conversion[Option[Int], XcelValue]].apply($fieldVal.asInstanceOf[Option[Int]]))
-                }
-              case '[Option[Long]] =>
-                '{
-                  Cell(summon[Conversion[Option[Long], XcelValue]].apply($fieldVal.asInstanceOf[Option[Long]]))
-                }
-              case '[Option[Boolean]] =>
-                '{
-                  Cell(summon[Conversion[Option[Boolean], XcelValue]].apply($fieldVal.asInstanceOf[Option[Boolean]]))
-                }
-              case '[Option[LocalDate]] =>
-                '{
-                  Cell(
-                    summon[Conversion[Option[LocalDate], XcelValue]].apply($fieldVal.asInstanceOf[Option[LocalDate]])
-                  )
-                }
-              case '[Option[LocalDateTime]] =>
-                '{
-                  Cell(
-                    summon[Conversion[Option[LocalDateTime], XcelValue]]
-                      .apply($fieldVal.asInstanceOf[Option[LocalDateTime]])
-                  )
-                }
-              case _ =>
-                report.error(
-                  s"""Unsupported type "${f.name}".""",
-                  f.pos.getOrElse(Position.ofMacroExpansion)
-                )
-                '{ Cell(EmptyXcel) }
-          }
-        )
+      val name = Expr(f.name)
+      '{
+        val converted = summon[Conversion[String, XcelValue]].apply($name)
+        Cell(converted)
       }
-      Row(cells)
     }
-
-    val rowsExpr: Expr[Seq[Row]] = '{ $recordsExpr.map($rowMapper) }
 
     '{
-      Sheet(
-        name = $classNameExpr,
-        header = Some($headerExpr),
-        rows = $rowsExpr
-      )
+      Row(${ Expr.ofSeq(headerCells) })
+    }
+  }
+
+  private inline def deriveRow[A](record: A): Row = ${ deriveRowImpl('record) }
+
+  private def deriveRowImpl[A: Type](recordExpr: Expr[A])(using Quotes): Expr[Row] = {
+    import quotes.reflect.*
+    import com.sugavi.xcel.syntax.given
+
+    val sym    = TypeRepr.of[A].typeSymbol
+    val fields = sym.caseFields
+
+    def cellMapper(field: quotes.reflect.Symbol): Expr[Cell] =
+      val fieldTerm = Select.unique(recordExpr.asTerm, field.name)
+      val fieldVal  = fieldTerm.asExpr
+
+      fieldTerm.tpe.asType match
+        case '[Option[t]] =>
+          '{
+            val convert = summon[Conversion[Option[t], XcelValue]].apply($fieldVal.asInstanceOf[Option[t]])
+            Cell(convert)
+          }
+        case '[t] =>
+          '{
+            val convert = summon[Conversion[t, XcelValue]].apply($fieldVal)
+            Cell(convert)
+          }
+
+    '{
+      val cells = ${ Expr.ofSeq(fields.map(cellMapper)) }
+      Row(cells)
     }
   }
 }

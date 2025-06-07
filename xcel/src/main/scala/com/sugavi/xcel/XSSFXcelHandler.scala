@@ -4,9 +4,6 @@ import com.sugavi.xcel.model.*
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFWorkbook}
 
-import java.time.{LocalDate, LocalDateTime}
-import scala.annotation.tailrec
-
 object XSSFXcelHandler {
 
   val DefaultNumberFormat   = "0"

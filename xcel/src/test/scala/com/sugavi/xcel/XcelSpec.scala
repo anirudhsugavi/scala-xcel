@@ -7,6 +7,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import java.time.{LocalDate, LocalDateTime}
+import scala.jdk.CollectionConverters.*
 
 object XcelSpec {
 
@@ -42,6 +43,26 @@ class XcelAsyncSpec extends AsyncFlatSpec with Matchers with ScalaCheckPropertyC
       }
     }
   }
+
+  it should "convert empty Seq to an empty sheet" in {
+    ScalaXcel.toExcelWorkbook(Seq.empty[Restaurant]).map { workbook =>
+      val sheet = workbook.getSheetAt(0)
+      sheet.getSheetName shouldEqual "Restaurant"
+      sheet.rowIterator().asScala shouldBe empty
+    }
+  }
+
+  it should "convert a Seq with more than 1 item to a sheet with multiple rows" in {
+    val restaurants = Gen.listOf(arbRestaurant).suchThat(_.size > 1).sample.get
+
+    ScalaXcel.toExcelWorkbook(restaurants).map { workbook =>
+      val sheet = workbook.getSheetAt(0)
+      sheet.getSheetName shouldEqual "Restaurant"
+      sheet.getRow(0).getCell(0).getStringCellValue shouldEqual "name"
+      sheet.getRow(1).getCell(0).getStringCellValue shouldEqual restaurants.head.name
+      sheet.getRow(2).getCell(0).getStringCellValue shouldEqual restaurants(1).name
+    }
+  }
 }
 
 class XcelSyncSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
@@ -66,6 +87,7 @@ class XcelSyncSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChec
     import scala.compiletime.testing.typeChecks
 
     typeChecks("ScalaXcel.toExcelWorkbookSync(Seq(ClassWithUnsupportedFieldType(1, 2)))") shouldBe false
+    typeChecks("""ScalaXcel.toExcelWorkbookSync(Seq(ClassWithUnsupportedOptionFieldType("hi", None)))""") shouldBe false
   }
 }
 
@@ -79,3 +101,4 @@ case class Restaurant(
 )
 
 case class ClassWithUnsupportedFieldType(int: Int, short: Short)
+case class ClassWithUnsupportedOptionFieldType(s: String, opt: Option[Short])
