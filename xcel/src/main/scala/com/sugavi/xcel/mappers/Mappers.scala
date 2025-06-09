@@ -64,7 +64,7 @@ object Mappers {
     val headerCells: Seq[Expr[Cell]] = fields.map { f =>
       val name = Expr(f.name)
       '{
-        val converted = summon[Conversion[String, XcelValue]].apply($name)
+        val converted = $name // this summons the implicit Conversion[String, XcelValue]
         Cell(converted)
       }
     }
@@ -90,12 +90,13 @@ object Mappers {
       fieldTerm.tpe.asType match
         case '[Option[t]] =>
           '{
-            val convert = summon[Conversion[Option[t], XcelValue]].apply($fieldVal.asInstanceOf[Option[t]])
+            val convert =
+              $fieldVal.asInstanceOf[Option[t]] // this summons the implicit Conversion[Option[A], XcelValue]
             Cell(convert)
           }
         case '[t] =>
           '{
-            val convert = summon[Conversion[t, XcelValue]].apply($fieldVal)
+            val convert = $fieldVal // this summons the implicit Conversion[A, XcelValue]
             Cell(convert)
           }
 
