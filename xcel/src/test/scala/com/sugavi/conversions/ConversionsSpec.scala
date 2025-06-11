@@ -9,7 +9,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import java.time.{LocalDate, LocalDateTime}
 import scala.language.implicitConversions
 
-class ConversionsSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
+class ConversionsSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks:
 
   "2 way conversions" should "test scala <-> xcel data conversions" in {
     forAll {
@@ -45,6 +45,5 @@ class ConversionsSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
         val optDob1: Option[Double]  = optDobX
     }
   }
-}
 
 case class User(name: String, age: Option[Int])

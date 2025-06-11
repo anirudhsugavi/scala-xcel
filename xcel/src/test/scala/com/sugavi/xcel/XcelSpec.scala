@@ -9,39 +9,38 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import java.time.{LocalDate, LocalDateTime}
 import scala.jdk.CollectionConverters.*
 
-object XcelSpec {
+object XcelSpec:
 
   val genLocalDate: Gen[LocalDate]         = Gen.choose(0, 100).map(y => LocalDate.ofEpochDay(y))
   val genLocalDateTime: Gen[LocalDateTime] = genLocalDate.map(_.atStartOfDay)
 
   given arbRestaurant: Gen[Restaurant] =
-    for {
+    for
       name         <- Gen.alphaStr.suchThat(_.nonEmpty)
       rating       <- Gen.choose(1.0, 5.0)
       isInBusiness <- Gen.oneOf(true, false)
       established  <- genLocalDate
       lastVisited  <- genLocalDateTime
       latestPromo  <- Gen.option(Gen.alphaStr.suchThat(_.nonEmpty))
-    } yield Restaurant(name, rating, isInBusiness, established, lastVisited, latestPromo)
-}
+    yield Restaurant(name, rating, isInBusiness, established, lastVisited, latestPromo)
 
-class XcelAsyncSpec extends AsyncFlatSpec with Matchers with ScalaCheckPropertyChecks {
+class XcelAsyncSpec extends AsyncFlatSpec with Matchers with ScalaCheckPropertyChecks:
 
   forAll(arbRestaurant) { restaurant =>
     it should s"convert $restaurant to XSSF Workbook" in {
-      ScalaXcel.toExcelWorkbook(Seq(restaurant)).map { workbook =>
-        val sheet = workbook.getSheetAt(0)
-        sheet.getSheetName shouldEqual "Restaurant"
-        sheet.getRow(0).getCell(0).getStringCellValue shouldEqual "name"
-        sheet.getRow(1).getCell(0).getStringCellValue shouldEqual restaurant.name
+        ScalaXcel.toExcelWorkbook(Seq(restaurant)).map { workbook =>
+          val sheet = workbook.getSheetAt(0)
+          sheet.getSheetName shouldEqual "Restaurant"
+          sheet.getRow(0).getCell(0).getStringCellValue shouldEqual "name"
+          sheet.getRow(1).getCell(0).getStringCellValue shouldEqual restaurant.name
 
-        sheet.getRow(0).getCell(1).getStringCellValue shouldEqual "rating"
-        sheet.getRow(1).getCell(1).getNumericCellValue shouldEqual restaurant.rating
+          sheet.getRow(0).getCell(1).getStringCellValue shouldEqual "rating"
+          sheet.getRow(1).getCell(1).getNumericCellValue shouldEqual restaurant.rating
 
-        sheet.getRow(0).getCell(4).getStringCellValue shouldEqual "lastVisited"
-        sheet.getRow(1).getCell(4).getLocalDateTimeCellValue shouldEqual restaurant.lastVisited
+          sheet.getRow(0).getCell(4).getStringCellValue shouldEqual "lastVisited"
+          sheet.getRow(1).getCell(4).getLocalDateTimeCellValue shouldEqual restaurant.lastVisited
+        }
       }
-    }
   }
 
   it should "convert empty Seq to an empty sheet" in {
@@ -63,24 +62,23 @@ class XcelAsyncSpec extends AsyncFlatSpec with Matchers with ScalaCheckPropertyC
       sheet.getRow(2).getCell(0).getStringCellValue shouldEqual restaurants(1).name
     }
   }
-}
 
-class XcelSyncSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
+class XcelSyncSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks:
 
   forAll(arbRestaurant) { restaurant =>
     it should s"convert $restaurant to XSSF Workbook synchronously" in {
-      val workbook = ScalaXcel.toExcelWorkbookSync(Seq(restaurant))
-      val sheet    = workbook.getSheetAt(0)
-      sheet.getSheetName shouldEqual "Restaurant"
-      sheet.getRow(0).getCell(0).getStringCellValue shouldEqual "name"
-      sheet.getRow(1).getCell(0).getStringCellValue shouldEqual restaurant.name
+        val workbook = ScalaXcel.toExcelWorkbookSync(Seq(restaurant))
+        val sheet    = workbook.getSheetAt(0)
+        sheet.getSheetName shouldEqual "Restaurant"
+        sheet.getRow(0).getCell(0).getStringCellValue shouldEqual "name"
+        sheet.getRow(1).getCell(0).getStringCellValue shouldEqual restaurant.name
 
-      sheet.getRow(0).getCell(1).getStringCellValue shouldEqual "rating"
-      sheet.getRow(1).getCell(1).getNumericCellValue shouldEqual restaurant.rating
+        sheet.getRow(0).getCell(1).getStringCellValue shouldEqual "rating"
+        sheet.getRow(1).getCell(1).getNumericCellValue shouldEqual restaurant.rating
 
-      sheet.getRow(0).getCell(4).getStringCellValue shouldEqual "lastVisited"
-      sheet.getRow(1).getCell(4).getLocalDateTimeCellValue shouldEqual restaurant.lastVisited
-    }
+        sheet.getRow(0).getCell(4).getStringCellValue shouldEqual "lastVisited"
+        sheet.getRow(1).getCell(4).getLocalDateTimeCellValue shouldEqual restaurant.lastVisited
+      }
   }
 
   it should "throw compiler error for unsupported field types" in {
@@ -100,7 +98,6 @@ class XcelSyncSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChec
 
     errors.map(_.message) should contain theSameElementsAs expectedErrors
   }
-}
 
 case class Restaurant(
   name: String,

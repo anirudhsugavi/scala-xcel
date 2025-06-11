@@ -4,27 +4,23 @@ import com.sugavi.xcel.model.*
 
 import java.time.{LocalDate, LocalDateTime}
 
-trait Bijection[A, B] {
+trait Bijection[A, B]:
   def aToB(a: A): B
   def bToA(b: B): A
-}
 
-object Bijection {
+object Bijection:
 
-  def apply[A, B](ab: A => B, ba: B => A): Bijection[A, B] = new Bijection[A, B] {
+  def apply[A, B](ab: A => B, ba: B => A): Bijection[A, B] = new Bijection[A, B]:
     override def aToB(a: A): B = ab(a)
     override def bToA(b: B): A = ba(b)
-  }
-}
 
-final class IdentityBijection[A] extends Bijection[A, A] {
+final class IdentityBijection[A] extends Bijection[A, A]:
   override def aToB(a: A): A = a
   override def bToA(b: A): A = b
-}
 
 trait Implicits
 
-trait BijectionImplicits extends Implicits {
+trait BijectionImplicits extends Implicits:
 
   given [A]: Bijection[A, XcelValue] = Bijection(
     ab = {
@@ -58,6 +54,5 @@ trait BijectionImplicits extends Implicits {
 
   given [A](using bij: Bijection[A, XcelValue]): Conversion[A, XcelValue] = bij.aToB
   given [A](using bij: Bijection[A, XcelValue]): Conversion[XcelValue, A] = bij.bToA
-}
 
 object BijectionImplicits extends BijectionImplicits

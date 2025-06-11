@@ -4,10 +4,10 @@ import com.sugavi.xcel.mappers.Mappers
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
-import scala.concurrent.{ExecutionContext, Future, blocking}
+import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.util.{Failure, Success, Using}
 
-object ScalaXcel {
+object ScalaXcel:
 
   inline def toExcelWorkbookSync[A](records: Seq[A]): XSSFWorkbook =
     val sheet = Mappers.deriveSheet(records)
@@ -34,4 +34,3 @@ object ScalaXcel {
     } match
       case Success(bytes) => bytes
       case Failure(ex)    => throw ex
-}

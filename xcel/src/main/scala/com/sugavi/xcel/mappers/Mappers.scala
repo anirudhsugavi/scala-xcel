@@ -6,7 +6,7 @@ import java.time.{LocalDate, LocalDateTime}
 import scala.annotation.tailrec
 import scala.quoted.*
 
-object Mappers {
+object Mappers:
 
   inline def deriveSheet[A](records: Seq[A]): Sheet = ${ deriveSheetImpl('records) }
 
@@ -82,4 +82,3 @@ object Mappers {
         val rows   = $recordsExpr.map(r => ${ deriveRow('r, fields) })
         Sheet(name = $classNameExpr, header = Some(header), rows = rows)
     }
-}

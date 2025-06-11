@@ -4,7 +4,7 @@ import com.sugavi.xcel.model.*
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFWorkbook}
 
-object XSSFXcelHandler {
+object XSSFXcelHandler:
 
   val DefaultNumberFormat   = "0"
   val DefaultDateFormat     = "yyyy-mm-dd"
@@ -86,4 +86,3 @@ object XSSFXcelHandler {
     style.setDataFormat(format.getFormat(DefaultDateTimeFormat))
 
     style
-}
