@@ -63,6 +63,19 @@ class XcelAsyncSpec extends AsyncFlatSpec with Matchers with ScalaCheckPropertyC
     }
   }
 
+  it should "honor provided options" in {
+    val restaurant      = arbRestaurant.sample.get
+    val customSheetName = "CustomSheet"
+    ScalaXcel
+      .toExcelWorkbookFuture(Seq(restaurant), XcelOptions(includeHeader = false, sheetName = Some(customSheetName)))
+      .map { workbook =>
+        val sheet = workbook.getSheetAt(0)
+        sheet.getSheetName shouldEqual customSheetName
+        sheet.rowIterator().asScala.size shouldEqual 1
+        sheet.getRow(0).getCell(0).getStringCellValue shouldEqual restaurant.name
+      }
+  }
+
 class XcelSyncSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks:
 
   forAll(arbRestaurant) { restaurant =>

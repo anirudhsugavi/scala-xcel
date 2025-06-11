@@ -1,14 +1,11 @@
 package com.sugavi.xcel
 
+import com.sugavi.xcel.XcelOptions.*
 import com.sugavi.xcel.model.*
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFWorkbook}
 
 object XSSFXcelHandler:
-
-  val DefaultNumberFormat   = "0"
-  val DefaultDateFormat     = "yyyy-mm-dd"
-  val DefaultDateTimeFormat = "yyyy-mm-dd HH:mm:ss"
 
   def toXSSFWorkbook(sheets: Seq[Sheet]): XSSFWorkbook =
     val workbook = new XSSFWorkbook()
