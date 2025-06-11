@@ -62,13 +62,12 @@ object Mappers:
         fieldTerm.tpe.asType match
           case '[Option[t]] =>
             '{
-              val convert =
-                $fieldVal.asInstanceOf[Option[t]] // this summons the implicit Conversion[Option[A], XcelValue]
+              val convert = $fieldVal.asInstanceOf[Option[t]] // this summons implicit Conversion[Option[A], XcelValue]
               Cell(convert)
             }
           case '[t] =>
             '{
-              val convert = $fieldVal // this summons the implicit Conversion[A, XcelValue]
+              val convert = $fieldVal // this summons implicit Conversion[A, XcelValue]
               Cell(convert)
             }
 

@@ -28,7 +28,7 @@ class XcelAsyncSpec extends AsyncFlatSpec with Matchers with ScalaCheckPropertyC
 
   forAll(arbRestaurant) { restaurant =>
     it should s"convert $restaurant to XSSF Workbook" in {
-        ScalaXcel.toExcelWorkbook(Seq(restaurant)).map { workbook =>
+        ScalaXcel.toExcelWorkbookFuture(Seq(restaurant)).map { workbook =>
           val sheet = workbook.getSheetAt(0)
           sheet.getSheetName shouldEqual "Restaurant"
           sheet.getRow(0).getCell(0).getStringCellValue shouldEqual "name"
@@ -44,7 +44,7 @@ class XcelAsyncSpec extends AsyncFlatSpec with Matchers with ScalaCheckPropertyC
   }
 
   it should "convert empty Seq to an empty sheet" in {
-    ScalaXcel.toExcelWorkbook(Seq.empty[Restaurant]).map { workbook =>
+    ScalaXcel.toExcelWorkbookFuture(Seq.empty[Restaurant]).map { workbook =>
       val sheet = workbook.getSheetAt(0)
       sheet.getSheetName shouldEqual "Restaurant"
       sheet.rowIterator().asScala shouldBe empty
@@ -54,7 +54,7 @@ class XcelAsyncSpec extends AsyncFlatSpec with Matchers with ScalaCheckPropertyC
   it should "convert a Seq with more than 1 item to a sheet with multiple rows" in {
     val restaurants = Gen.listOf(arbRestaurant).retryUntil(_.size > 1).sample.get
 
-    ScalaXcel.toExcelWorkbook(restaurants).map { workbook =>
+    ScalaXcel.toExcelWorkbookFuture(restaurants).map { workbook =>
       val sheet = workbook.getSheetAt(0)
       sheet.getSheetName shouldEqual "Restaurant"
       sheet.getRow(0).getCell(0).getStringCellValue shouldEqual "name"
@@ -67,7 +67,7 @@ class XcelSyncSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChec
 
   forAll(arbRestaurant) { restaurant =>
     it should s"convert $restaurant to XSSF Workbook synchronously" in {
-        val workbook = ScalaXcel.toExcelWorkbookSync(Seq(restaurant))
+        val workbook = ScalaXcel.toExcelWorkbook(Seq(restaurant))
         val sheet    = workbook.getSheetAt(0)
         sheet.getSheetName shouldEqual "Restaurant"
         sheet.getRow(0).getCell(0).getStringCellValue shouldEqual "name"
@@ -86,12 +86,12 @@ class XcelSyncSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChec
 
     val errors = typeCheckErrors(
       """
-        |ScalaXcel.toExcelWorkbookSync(Seq(ClassWithUnsupportedFieldType(1, 2)))
-        |ScalaXcel.toExcelWorkbookSync(Seq(ClassWithUnsupportedOptionFieldType("hi", None)))
+        |ScalaXcel.toExcelWorkbook(Seq(ClassWithUnsupportedFieldType(1, 2)))
+        |ScalaXcel.toExcelWorkbook(Seq(ClassWithUnsupportedOptionFieldType("hi", None)))
         |""".stripMargin
     )
 
-    val expectedErrors = List(
+    val expectedErrors = Seq(
       "Unsupported field types: [opt: scala.Option[scala.Short]]",
       "Unsupported field types: [short: scala.Short]"
     )
