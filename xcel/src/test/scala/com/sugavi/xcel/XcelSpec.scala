@@ -52,7 +52,7 @@ class XcelAsyncSpec extends AsyncFlatSpec with Matchers with ScalaCheckPropertyC
   }
 
   it should "convert a Seq with more than 1 item to a sheet with multiple rows" in {
-    val restaurants = Gen.listOf(arbRestaurant).suchThat(_.size > 1).sample.get
+    val restaurants = Gen.listOf(arbRestaurant).retryUntil(_.size > 1).sample.get
 
     ScalaXcel.toExcelWorkbook(restaurants).map { workbook =>
       val sheet = workbook.getSheetAt(0)
