@@ -84,10 +84,21 @@ class XcelSyncSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChec
   }
 
   it should "throw compiler error for unsupported field types" in {
-    import scala.compiletime.testing.typeChecks
+    import scala.compiletime.testing.*
 
-    typeChecks("ScalaXcel.toExcelWorkbookSync(Seq(ClassWithUnsupportedFieldType(1, 2)))") shouldBe false
-    typeChecks("""ScalaXcel.toExcelWorkbookSync(Seq(ClassWithUnsupportedOptionFieldType("hi", None)))""") shouldBe false
+    val errors = typeCheckErrors(
+      """
+        |ScalaXcel.toExcelWorkbookSync(Seq(ClassWithUnsupportedFieldType(1, 2)))
+        |ScalaXcel.toExcelWorkbookSync(Seq(ClassWithUnsupportedOptionFieldType("hi", None)))
+        |""".stripMargin
+    )
+
+    val expectedErrors = List(
+      "Unsupported field types: [opt: scala.Option[scala.Short]]",
+      "Unsupported field types: [short: scala.Short]"
+    )
+
+    errors.map(_.message) should contain theSameElementsAs expectedErrors
   }
 }
 
