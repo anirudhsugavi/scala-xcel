@@ -7,24 +7,25 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.util.{Failure, Success, Using}
 
-object ScalaXcel:
+object ScalaXcel extends ScalaXcel:
 
-  inline def toExcelWorkbookSync[A](records: Seq[A]): XSSFWorkbook =
+  override inline def toExcelWorkbookSync[A](records: Seq[A]): XSSFWorkbook =
     val sheet = Mappers.deriveSheet(records)
     XSSFXcelHandler.toXSSFWorkbook(Seq(sheet))
 
-  inline def toExcelWorkbook[A](records: Seq[A])(using ec: ExecutionContext): Future[XSSFWorkbook] = Future {
-    blocking {
-      val sheet = Mappers.deriveSheet(records)
-      XSSFXcelHandler.toXSSFWorkbook(Seq(sheet))
+  override inline def toExcelWorkbook[A](records: Seq[A])(using ec: ExecutionContext): Future[XSSFWorkbook] =
+    Future {
+      blocking {
+        val sheet = Mappers.deriveSheet(records)
+        XSSFXcelHandler.toXSSFWorkbook(Seq(sheet))
+      }
     }
-  }
 
-  inline def toExcelBytesSync[A](records: Seq[A]): Array[Byte] =
+  override inline def toExcelBytesSync[A](records: Seq[A]): Array[Byte] =
     val workbook = toExcelWorkbookSync(records)
     toBytes(workbook)
 
-  inline def toExcelBytes[A](records: Seq[A])(using ec: ExecutionContext): Future[Array[Byte]] =
+  override inline def toExcelBytes[A](records: Seq[A])(using ec: ExecutionContext): Future[Array[Byte]] =
     toExcelWorkbook(records).flatMap(workbook => Future(blocking(toBytes(workbook))))
 
   private def toBytes(workbook: XSSFWorkbook): Array[Byte] =
@@ -34,3 +35,12 @@ object ScalaXcel:
     } match
       case Success(bytes) => bytes
       case Failure(ex)    => throw ex
+
+trait ScalaXcel:
+  def toExcelWorkbookSync[A](records: Seq[A]): XSSFWorkbook
+
+  def toExcelWorkbook[A](records: Seq[A])(using ec: ExecutionContext): Future[XSSFWorkbook]
+
+  def toExcelBytesSync[A](records: Seq[A]): Array[Byte]
+
+  def toExcelBytes[A](records: Seq[A])(using ec: ExecutionContext): Future[Array[Byte]]
