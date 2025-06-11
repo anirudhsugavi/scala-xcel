@@ -52,7 +52,4 @@ trait BijectionImplicits extends Implicits:
     }
   )
 
-  given [A](using bij: Bijection[A, XcelValue]): Conversion[A, XcelValue] = bij.aToB
-  given [A](using bij: Bijection[A, XcelValue]): Conversion[XcelValue, A] = bij.bToA
-
 object BijectionImplicits extends BijectionImplicits

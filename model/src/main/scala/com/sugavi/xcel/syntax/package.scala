@@ -2,4 +2,4 @@ package com.sugavi.xcel
 
 package object syntax extends All
 
-trait All extends BijectionImplicits
+trait All extends BijectionImplicits with Conversions
