@@ -97,7 +97,7 @@ trait ScalaXcel:
    * @param options
    *   configuration options for Excel generation, including header inclusion, sheet name, and formatting
    * @return
-   *   the Excel file as a byte array
+   *   the Excel file as a byte array wrapped in a Try
    */
   def toExcelBytes[A](records: Seq[A], options: XcelOptions): Try[Array[Byte]]
 
