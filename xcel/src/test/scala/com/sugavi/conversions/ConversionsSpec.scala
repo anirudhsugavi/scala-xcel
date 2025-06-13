@@ -42,7 +42,7 @@ class ConversionsSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
         val date1: LocalDate         = dateX
         val dateTime1: LocalDateTime = dateTimeX
         val optStr1: Option[String]  = optStrX
-        val optDob1: Option[Double]  = optDobX
+        val optDob1: Option[Double]  = EmptyXcel
     }
   }
 

@@ -40,7 +40,7 @@ trait BijectionImplicits extends Implicits:
       case BooleanXcel(v)  => v.asInstanceOf[A]
       case DateXcel(v)     => v.asInstanceOf[A]
       case DateTimeXcel(v) => v.asInstanceOf[A]
-      case EmptyXcel       => None.asInstanceOf[A]
+      case EmptyXcel       => ??? // this will be converted to Option[A] using Bijection[Option[A], XcelValue]
     }
   )
 
