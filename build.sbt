@@ -12,10 +12,12 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 lazy val model = project
   .in(file("model"))
+  .settings(scalafixSettings)
   .settings(name := "model")
 
 lazy val xcel = project
   .in(file("xcel"))
+  .settings(scalafixSettings)
   .settings(
     name := "xcel",
     libraryDependencies ++= Seq(
@@ -33,9 +35,21 @@ lazy val `scala-excel` = project
   .settings(
     name           := "scala-xcel",
     publish / skip := true,
-    Test / fork    := !isDebug
+    Test / fork    := !isDebug,
   )
 
-enablePlugins(ScalafmtPlugin)
+lazy val scalafixSettings = Seq(
+  semanticdbEnabled := true,
+  scalacOptions ++= Seq(
+    "-Wall",
+    "-feature",
+    "-Wunused:unsafe-warn-patvars",
+  )
+)
+
+enablePlugins(
+  ScalafmtPlugin,
+  ScalafixPlugin,
+)
 
 def isDebug: Boolean = ManagementFactory.getRuntimeMXBean.getInputArguments.contains("-Xdebug")
