@@ -4,6 +4,7 @@ import com.sugavi.xcel.model.*
 
 import java.time.{LocalDate, LocalDateTime}
 import scala.annotation.tailrec
+import scala.language.implicitConversions
 import scala.quoted.*
 
 object Mappers:
