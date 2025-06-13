@@ -5,7 +5,7 @@ import com.sugavi.xcel.model.Sheet
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
-import scala.concurrent.{blocking, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future, blocking}
 import scala.util.chaining.scalaUtilChainingOps
 import scala.util.{Failure, Success, Try, Using}
 
