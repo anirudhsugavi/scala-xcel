@@ -8,7 +8,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import java.time.{LocalDate, LocalDateTime}
 import scala.language.implicitConversions
 
-class ConversionsSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks:
+class ConversionsSpec extends AnyFlatSpec, Matchers, ScalaCheckPropertyChecks:
 
   "2 way conversions" should "test scala <-> xcel data conversions" in {
     forAll {

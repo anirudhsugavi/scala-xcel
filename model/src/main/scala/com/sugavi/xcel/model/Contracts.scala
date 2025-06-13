@@ -14,7 +14,7 @@ case class Row(cells: Seq[Cell])
 
 case class Cell(value: XcelValue)
 
-sealed trait XcelValue extends Product with Serializable
+sealed trait XcelValue extends Product, Serializable
 
 case class StringXcel(value: String)          extends XcelValue
 case class DoubleXcel(value: Double)          extends XcelValue

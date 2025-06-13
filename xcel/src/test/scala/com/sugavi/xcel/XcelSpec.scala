@@ -24,42 +24,49 @@ object XcelSpec:
       latestPromo  <- Gen.option(Gen.alphaStr.suchThat(_.nonEmpty))
     yield Restaurant(name, rating, isInBusiness, established, lastVisited, latestPromo)
 
-class XcelAsyncSpec extends AsyncFlatSpec with Matchers with ScalaCheckPropertyChecks:
+class XcelAsyncSpec extends AsyncFlatSpec, Matchers, ScalaCheckPropertyChecks:
 
   forAll(arbRestaurant) { restaurant =>
     it should s"convert $restaurant to XSSF Workbook" in {
-        ScalaXcel.toExcelWorkbookFuture(Seq(restaurant)).map { workbook =>
+        ScalaXcel.toExcelWorkbookFuture(Seq(restaurant)).flatMap { workbook =>
           val sheet = workbook.getSheetAt(0)
-          sheet.getSheetName shouldEqual "Restaurant"
-          sheet.getRow(0).getCell(0).getStringCellValue shouldEqual "name"
-          sheet.getRow(1).getCell(0).getStringCellValue shouldEqual restaurant.name
 
-          sheet.getRow(0).getCell(1).getStringCellValue shouldEqual "rating"
-          sheet.getRow(1).getCell(1).getNumericCellValue shouldEqual restaurant.rating
+          for
+            _ <- sheet.getSheetName shouldEqual "Restaurant"
+            _ <- sheet.getRow(0).getCell(0).getStringCellValue shouldEqual "name"
+            _ <- sheet.getRow(1).getCell(0).getStringCellValue shouldEqual restaurant.name
 
-          sheet.getRow(0).getCell(4).getStringCellValue shouldEqual "lastVisited"
-          sheet.getRow(1).getCell(4).getLocalDateTimeCellValue shouldEqual restaurant.lastVisited
+            _ <- sheet.getRow(0).getCell(1).getStringCellValue shouldEqual "rating"
+            _ <- sheet.getRow(1).getCell(1).getNumericCellValue shouldEqual restaurant.rating
+
+            _ <- sheet.getRow(0).getCell(4).getStringCellValue shouldEqual "lastVisited"
+            _ <- sheet.getRow(1).getCell(4).getLocalDateTimeCellValue shouldEqual restaurant.lastVisited
+          yield succeed
         }
       }
   }
 
   it should "convert empty Seq to an empty sheet" in {
-    ScalaXcel.toExcelWorkbookFuture(Seq.empty[Restaurant]).map { workbook =>
+    ScalaXcel.toExcelWorkbookFuture(Seq.empty[Restaurant]).flatMap { workbook =>
       val sheet = workbook.getSheetAt(0)
-      sheet.getSheetName shouldEqual "Restaurant"
-      sheet.rowIterator().asScala shouldBe empty
+      for
+        _ <- sheet.getSheetName shouldEqual "Restaurant"
+        _ <- sheet.rowIterator().asScala shouldBe empty
+      yield succeed
     }
   }
 
   it should "convert a Seq with more than 1 item to a sheet with multiple rows" in {
     val restaurants = Gen.listOf(arbRestaurant).retryUntil(_.size > 1).sample.get
 
-    ScalaXcel.toExcelWorkbookFuture(restaurants).map { workbook =>
+    ScalaXcel.toExcelWorkbookFuture(restaurants).flatMap { workbook =>
       val sheet = workbook.getSheetAt(0)
-      sheet.getSheetName shouldEqual "Restaurant"
-      sheet.getRow(0).getCell(0).getStringCellValue shouldEqual "name"
-      sheet.getRow(1).getCell(0).getStringCellValue shouldEqual restaurants.head.name
-      sheet.getRow(2).getCell(0).getStringCellValue shouldEqual restaurants(1).name
+      for
+        _ <- sheet.getSheetName shouldEqual "Restaurant"
+        _ <- sheet.getRow(0).getCell(0).getStringCellValue shouldEqual "name"
+        _ <- sheet.getRow(1).getCell(0).getStringCellValue shouldEqual restaurants.head.name
+        _ <- sheet.getRow(2).getCell(0).getStringCellValue shouldEqual restaurants(1).name
+      yield succeed
     }
   }
 
@@ -68,29 +75,40 @@ class XcelAsyncSpec extends AsyncFlatSpec with Matchers with ScalaCheckPropertyC
     val customSheetName = "CustomSheet"
     ScalaXcel
       .toExcelWorkbookFuture(Seq(restaurant), XcelOptions(includeHeader = false, sheetName = Some(customSheetName)))
-      .map { workbook =>
+      .flatMap { workbook =>
         val sheet = workbook.getSheetAt(0)
-        sheet.getSheetName shouldEqual customSheetName
-        sheet.rowIterator().asScala.size shouldEqual 1
-        sheet.getRow(0).getCell(0).getStringCellValue shouldEqual restaurant.name
+        for
+          _ <- sheet.getSheetName shouldEqual customSheetName
+          _ <- sheet.rowIterator().asScala.size shouldEqual 1
+          _ <- sheet.getRow(0).getCell(0).getStringCellValue shouldEqual restaurant.name
+        yield succeed
       }
   }
 
-class XcelSyncSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks:
+class XcelSyncSpec extends AnyFlatSpec, Matchers, ScalaCheckPropertyChecks:
 
   forAll(arbRestaurant) { restaurant =>
     it should s"convert $restaurant to XSSF Workbook synchronously" in {
         val workbook = ScalaXcel.toExcelWorkbook(Seq(restaurant))
         val sheet    = workbook.getSheetAt(0)
-        sheet.getSheetName shouldEqual "Restaurant"
-        sheet.getRow(0).getCell(0).getStringCellValue shouldEqual "name"
-        sheet.getRow(1).getCell(0).getStringCellValue shouldEqual restaurant.name
 
-        sheet.getRow(0).getCell(1).getStringCellValue shouldEqual "rating"
-        sheet.getRow(1).getCell(1).getNumericCellValue shouldEqual restaurant.rating
-
-        sheet.getRow(0).getCell(4).getStringCellValue shouldEqual "lastVisited"
-        sheet.getRow(1).getCell(4).getLocalDateTimeCellValue shouldEqual restaurant.lastVisited
+        (
+          sheet.getSheetName,
+          sheet.getRow(0).getCell(0).getStringCellValue,
+          sheet.getRow(1).getCell(0).getStringCellValue,
+          sheet.getRow(0).getCell(1).getStringCellValue,
+          sheet.getRow(1).getCell(1).getNumericCellValue,
+          sheet.getRow(0).getCell(4).getStringCellValue,
+          sheet.getRow(1).getCell(4).getLocalDateTimeCellValue
+        ) shouldEqual (
+          "Restaurant",
+          "name",
+          restaurant.name,
+          "rating",
+          restaurant.rating,
+          "lastVisited",
+          restaurant.lastVisited
+        )
       }
   }
 
