@@ -1,6 +1,5 @@
 package com.sugavi.xcel
 
-import com.sugavi.xcel.Conversions.*
 import com.sugavi.xcel.mappers.Mappers
 import com.sugavi.xcel.model.Sheet
 import org.apache.commons.io.output.ByteArrayOutputStream
@@ -8,7 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.util.chaining.scalaUtilChainingOps
-import scala.util.{Failure, Success, Using}
+import scala.util.{Failure, Success, Try, Using}
 
 object ScalaXcel extends ScalaXcel:
 
@@ -26,21 +25,27 @@ object ScalaXcel extends ScalaXcel:
   ): Future[XSSFWorkbook] =
     Future(blocking(toExcelWorkbook(records, options)))
 
-  override inline def toExcelBytes[A](records: Seq[A], options: XcelOptions = XcelOptions.AllDefaults): Array[Byte] =
+  override inline def toExcelBytes[A](
+    records: Seq[A],
+    options: XcelOptions = XcelOptions.AllDefaults
+  ): Try[Array[Byte]] =
     toExcelWorkbook(records).pipe(toBytes)
 
   override inline def toExcelBytesFuture[A](records: Seq[A], options: XcelOptions = XcelOptions.AllDefaults)(
     using ec: ExecutionContext
   ): Future[Array[Byte]] =
-    toExcelWorkbookFuture(records).flatMap(workbook => Future(blocking(toBytes(workbook))))
+    toExcelWorkbookFuture(records)
+      .flatMap(workbook => Future(blocking(toBytes(workbook))))
+      .flatMap {
+        case Success(bytes) => Future.successful(bytes)
+        case Failure(ex)    => Future.failed(ex)
+      }
 
-  private def toBytes(workbook: XSSFWorkbook): Array[Byte] =
+  private def toBytes(workbook: XSSFWorkbook): Try[Array[Byte]] =
     Using(new ByteArrayOutputStream()) { bos =>
       workbook.write(bos)
       bos.toByteArray
-    } match
-      case Success(bytes) => bytes
-      case Failure(ex)    => throw ex
+    }
 
   private def applySheetOptions(sheet: Sheet, opts: XcelOptions): Sheet =
     opts
@@ -94,7 +99,7 @@ trait ScalaXcel:
    * @return
    *   the Excel file as a byte array
    */
-  def toExcelBytes[A](records: Seq[A], options: XcelOptions): Array[Byte]
+  def toExcelBytes[A](records: Seq[A], options: XcelOptions): Try[Array[Byte]]
 
   /**
    * Asynchronously converts a sequence of case classes to an Excel file as bytes.
