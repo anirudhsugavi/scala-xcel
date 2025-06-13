@@ -23,7 +23,7 @@ trait Implicits
 trait BijectionImplicits extends Implicits:
 
   given [A]: Bijection[A, XcelValue] = Bijection(
-    ab = {
+    ab =
       case s: String          => StringXcel(s)
       case d: Double          => DoubleXcel(d)
       case i: Int             => IntXcel(i)
@@ -31,17 +31,17 @@ trait BijectionImplicits extends Implicits:
       case b: Boolean         => BooleanXcel(b)
       case ld: LocalDate      => DateXcel(ld)
       case ldt: LocalDateTime => DateTimeXcel(ldt)
-    },
-    ba = {
-      case StringXcel(v)   => v.asInstanceOf[A]
-      case DoubleXcel(v)   => v.asInstanceOf[A]
-      case IntXcel(v)      => v.asInstanceOf[A]
-      case LongXcel(v)     => v.asInstanceOf[A]
-      case BooleanXcel(v)  => v.asInstanceOf[A]
-      case DateXcel(v)     => v.asInstanceOf[A]
-      case DateTimeXcel(v) => v.asInstanceOf[A]
-      case EmptyXcel       => ??? // this will be converted to Option[A] using Bijection[Option[A], XcelValue]
-    }
+    ,
+    ba = xcelVal =>
+      (xcelVal: @unchecked) match
+        case StringXcel(v)   => v.asInstanceOf[A]
+        case DoubleXcel(v)   => v.asInstanceOf[A]
+        case IntXcel(v)      => v.asInstanceOf[A]
+        case LongXcel(v)     => v.asInstanceOf[A]
+        case BooleanXcel(v)  => v.asInstanceOf[A]
+        case DateXcel(v)     => v.asInstanceOf[A]
+        case DateTimeXcel(v) => v.asInstanceOf[A]
+        // case EmptyXcel will be converted to Option[A] using Bijection[Option[A], XcelValue]
   )
 
   given [A](using bij: Bijection[A, XcelValue]): Bijection[Option[A], XcelValue] = Bijection(
