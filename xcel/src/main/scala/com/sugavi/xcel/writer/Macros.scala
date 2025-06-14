@@ -1,4 +1,4 @@
-package com.sugavi.xcel.mappers
+package com.sugavi.xcel.writer
 
 import com.sugavi.xcel.model.*
 
@@ -7,7 +7,7 @@ import scala.annotation.tailrec
 import scala.language.implicitConversions
 import scala.quoted.*
 
-object Mappers:
+object Macros:
 
   inline def deriveSheet[A](records: Seq[A]): Sheet = ${ deriveSheetImpl('records) }
 

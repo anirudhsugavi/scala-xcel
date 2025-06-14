@@ -1,4 +1,4 @@
-package com.sugavi.xcel
+package com.sugavi.xcel.writer
 
 object XcelOptions:
   val DefaultNumberFormat   = "0"

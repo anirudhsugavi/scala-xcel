@@ -1,9 +1,10 @@
-package com.sugavi.xcel
+package com.sugavi.xcel.writer
 
-import com.sugavi.xcel.XcelOptions.*
 import com.sugavi.xcel.model.*
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFWorkbook}
+
+import XcelOptions.*
 
 object XSSFXcelHandler:
 

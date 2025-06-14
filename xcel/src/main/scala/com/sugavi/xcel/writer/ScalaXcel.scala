@@ -1,6 +1,5 @@
-package com.sugavi.xcel
+package com.sugavi.xcel.writer
 
-import com.sugavi.xcel.mappers.Mappers
 import com.sugavi.xcel.model.Sheet
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -15,7 +14,7 @@ object ScalaXcel extends ScalaXcel:
     records: Seq[A],
     options: XcelOptions = XcelOptions.AllDefaults
   ): XSSFWorkbook =
-    Mappers
+    Macros
       .deriveSheet(records)
       .pipe(applySheetOptions(_, options))
       .pipe(sh => XSSFXcelHandler.toXSSFWorkbook(Seq(sh)))

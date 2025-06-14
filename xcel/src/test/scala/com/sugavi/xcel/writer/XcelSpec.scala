@@ -1,6 +1,5 @@
-package com.sugavi.xcel
+package com.sugavi.xcel.writer
 
-import com.sugavi.xcel.XcelSpec.arbRestaurant
 import org.scalacheck.Gen
 import org.scalatest.flatspec.{AnyFlatSpec, AsyncFlatSpec}
 import org.scalatest.matchers.should.Matchers
@@ -9,12 +8,14 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import java.time.{LocalDate, LocalDateTime}
 import scala.jdk.CollectionConverters.*
 
+import XcelSpec.*
+
 object XcelSpec:
 
   val genLocalDate: Gen[LocalDate]         = Gen.choose(0, 100).map(y => LocalDate.ofEpochDay(y))
   val genLocalDateTime: Gen[LocalDateTime] = genLocalDate.map(_.atStartOfDay)
 
-  given arbRestaurant: Gen[Restaurant] =
+  val arbRestaurant: Gen[Restaurant] =
     for
       name         <- Gen.alphaStr.suchThat(_.nonEmpty)
       rating       <- Gen.choose(1.0, 5.0)
