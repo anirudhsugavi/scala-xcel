@@ -17,7 +17,7 @@ object ScalaXcel extends ScalaXcel:
     Macros
       .deriveSheet(records)
       .pipe(applySheetOptions(_, options))
-      .pipe(sh => XSSFXcelHandler.toXSSFWorkbook(Seq(sh)))
+      .pipe(sh => XSSFXcelWriter.toXSSFWorkbook(Seq(sh)))
 
   override inline def toExcelWorkbookFuture[A](records: Seq[A], options: XcelOptions = XcelOptions.AllDefaults)(
     using ec: ExecutionContext

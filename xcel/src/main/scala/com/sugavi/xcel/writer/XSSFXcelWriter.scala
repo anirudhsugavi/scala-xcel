@@ -6,7 +6,7 @@ import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFWorkbook}
 
 import XcelOptions.*
 
-object XSSFXcelHandler:
+object XSSFXcelWriter:
 
   def toXSSFWorkbook(sheets: Seq[Sheet]): XSSFWorkbook =
     val workbook = new XSSFWorkbook()
