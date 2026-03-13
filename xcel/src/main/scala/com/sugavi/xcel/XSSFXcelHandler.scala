@@ -1,18 +1,17 @@
 package com.sugavi.xcel
 
-import com.sugavi.xcel.XcelOptions.*
 import com.sugavi.xcel.model.*
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFWorkbook}
 
 object XSSFXcelHandler:
 
-  def toXSSFWorkbook(sheets: Seq[Sheet]): XSSFWorkbook =
+  def toXSSFWorkbook(sheets: Seq[Sheet], options: XcelOptions = XcelOptions.Default): XSSFWorkbook =
     val workbook = new XSSFWorkbook()
 
-    val numericStyle  = getNumericCellStyle(workbook)
-    val dateStyle     = getDateCellStyle(workbook)
-    val dateTimeStyle = getDateTimeCellStyle(workbook)
+    val numericStyle  = getNumericCellStyle(workbook, options.numberFormat)
+    val dateStyle     = getDateCellStyle(workbook, options.dateFormat)
+    val dateTimeStyle = getDateTimeCellStyle(workbook, options.dateTimeFormat)
 
     sheets.foreach { sheet =>
       val xssfSheet = workbook.createSheet(sheet.name)
@@ -63,23 +62,23 @@ object XSSFXcelHandler:
       case EmptyXcel =>
         poiCell.setBlank()
 
-  private def getNumericCellStyle(workbook: XSSFWorkbook): CellStyle =
+  private def getNumericCellStyle(workbook: XSSFWorkbook, numberFormat: String): CellStyle =
     val style  = workbook.createCellStyle()
     val format = workbook.createDataFormat()
-    style.setDataFormat(format.getFormat(DefaultNumberFormat))
+    style.setDataFormat(format.getFormat(numberFormat))
 
     style
 
-  private def getDateCellStyle(workbook: XSSFWorkbook): CellStyle =
+  private def getDateCellStyle(workbook: XSSFWorkbook, dateFormat: String): CellStyle =
     val style  = workbook.createCellStyle()
     val format = workbook.createDataFormat()
-    style.setDataFormat(format.getFormat(DefaultDateFormat))
+    style.setDataFormat(format.getFormat(dateFormat))
 
     style
 
-  private def getDateTimeCellStyle(workbook: XSSFWorkbook): CellStyle =
+  private def getDateTimeCellStyle(workbook: XSSFWorkbook, dateTimeFormat: String): CellStyle =
     val style  = workbook.createCellStyle()
     val format = workbook.createDataFormat()
-    style.setDataFormat(format.getFormat(DefaultDateTimeFormat))
+    style.setDataFormat(format.getFormat(dateTimeFormat))
 
     style

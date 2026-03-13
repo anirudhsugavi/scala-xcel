@@ -76,6 +76,56 @@ class XcelAsyncSpec extends AsyncFlatSpec with Matchers with ScalaCheckPropertyC
       }
   }
 
+  it should "apply custom number format to numeric cells" in {
+    val record       = FormatTestRecord("test", 42, 100L, LocalDate.of(2024, 1, 1), LocalDateTime.of(2024, 1, 1, 12, 0))
+    val customFormat = "#,##0.00"
+    ScalaXcel
+      .toExcelWorkbookFuture(Seq(record), XcelOptions(numberFormat = customFormat))
+      .map { workbook =>
+        val sheet = workbook.getSheetAt(0)
+        // Int cell (index 1)
+        sheet.getRow(1).getCell(1).getCellStyle.getDataFormatString shouldEqual customFormat
+        // Long cell (index 2)
+        sheet.getRow(1).getCell(2).getCellStyle.getDataFormatString shouldEqual customFormat
+      }
+  }
+
+  it should "apply custom date format to date cells" in {
+    val record       = FormatTestRecord("test", 42, 100L, LocalDate.of(2024, 1, 1), LocalDateTime.of(2024, 1, 1, 12, 0))
+    val customFormat = "dd/mm/yyyy"
+    ScalaXcel
+      .toExcelWorkbookFuture(Seq(record), XcelOptions(dateFormat = customFormat))
+      .map { workbook =>
+        val sheet = workbook.getSheetAt(0)
+        // LocalDate cell (index 3)
+        sheet.getRow(1).getCell(3).getCellStyle.getDataFormatString shouldEqual customFormat
+      }
+  }
+
+  it should "apply custom datetime format to datetime cells" in {
+    val record       = FormatTestRecord("test", 42, 100L, LocalDate.of(2024, 1, 1), LocalDateTime.of(2024, 1, 1, 12, 0))
+    val customFormat = "dd/mm/yyyy HH:mm"
+    ScalaXcel
+      .toExcelWorkbookFuture(Seq(record), XcelOptions(dateTimeFormat = customFormat))
+      .map { workbook =>
+        val sheet = workbook.getSheetAt(0)
+        // LocalDateTime cell (index 4)
+        sheet.getRow(1).getCell(4).getCellStyle.getDataFormatString shouldEqual customFormat
+      }
+  }
+
+  it should "apply default formats when using default options" in {
+    val record = FormatTestRecord("test", 42, 100L, LocalDate.of(2024, 1, 1), LocalDateTime.of(2024, 1, 1, 12, 0))
+    ScalaXcel
+      .toExcelWorkbookFuture(Seq(record))
+      .map { workbook =>
+        val sheet = workbook.getSheetAt(0)
+        sheet.getRow(1).getCell(1).getCellStyle.getDataFormatString shouldEqual XcelOptions.DefaultNumberFormat
+        sheet.getRow(1).getCell(3).getCellStyle.getDataFormatString shouldEqual XcelOptions.DefaultDateFormat
+        sheet.getRow(1).getCell(4).getCellStyle.getDataFormatString shouldEqual XcelOptions.DefaultDateTimeFormat
+      }
+  }
+
 class XcelSyncSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks:
 
   forAll(arbRestaurant) { restaurant =>
@@ -123,3 +173,11 @@ case class Restaurant(
 
 case class ClassWithUnsupportedFieldType(int: Int, short: Short)
 case class ClassWithUnsupportedOptionFieldType(s: String, opt: Option[Short])
+
+case class FormatTestRecord(
+  name: String,
+  count: Int,
+  total: Long,
+  createdDate: LocalDate,
+  updatedAt: LocalDateTime
+)

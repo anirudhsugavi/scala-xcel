@@ -13,25 +13,25 @@ object ScalaXcel extends ScalaXcel:
 
   override inline def toExcelWorkbook[A](
     records: Seq[A],
-    options: XcelOptions = XcelOptions.AllDefaults
+    options: XcelOptions = XcelOptions.Default
   ): XSSFWorkbook =
     Mappers
       .deriveSheet(records)
       .pipe(applySheetOptions(_, options))
-      .pipe(sh => XSSFXcelHandler.toXSSFWorkbook(Seq(sh)))
+      .pipe(sh => XSSFXcelHandler.toXSSFWorkbook(Seq(sh), options))
 
-  override inline def toExcelWorkbookFuture[A](records: Seq[A], options: XcelOptions = XcelOptions.AllDefaults)(
+  override inline def toExcelWorkbookFuture[A](records: Seq[A], options: XcelOptions = XcelOptions.Default)(
     using ec: ExecutionContext
   ): Future[XSSFWorkbook] =
     Future(blocking(toExcelWorkbook(records, options)))
 
   override inline def toExcelBytes[A](
     records: Seq[A],
-    options: XcelOptions = XcelOptions.AllDefaults
+    options: XcelOptions = XcelOptions.Default
   ): Try[Array[Byte]] =
     toExcelWorkbook(records).pipe(toBytes)
 
-  override inline def toExcelBytesFuture[A](records: Seq[A], options: XcelOptions = XcelOptions.AllDefaults)(
+  override inline def toExcelBytesFuture[A](records: Seq[A], options: XcelOptions = XcelOptions.Default)(
     using ec: ExecutionContext
   ): Future[Array[Byte]] =
     toExcelWorkbookFuture(records)

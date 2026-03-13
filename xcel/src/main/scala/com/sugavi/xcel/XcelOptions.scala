@@ -5,7 +5,7 @@ object XcelOptions:
   val DefaultDateFormat     = "yyyy-mm-dd"
   val DefaultDateTimeFormat = "yyyy-mm-dd HH:mm:ss"
 
-  val AllDefaults: XcelOptions = XcelOptions()
+  val Default: XcelOptions = XcelOptions()
 
 case class XcelOptions(
   includeHeader: Boolean = true,
