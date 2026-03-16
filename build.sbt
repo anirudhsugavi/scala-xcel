@@ -21,9 +21,7 @@ lazy val core = project
   .settings(
     name := "core",
     libraryDependencies ++= Seq(
-      "org.scalatest"     %% "scalatest"       % "3.2.19"   % Test,
-      "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0" % Test
-    )
+    ) ++ testDependencies
   )
   .dependsOn(model)
 
@@ -33,17 +31,15 @@ lazy val xcel = project
   .settings(
     name := "xcel",
     libraryDependencies ++= Seq(
-      "org.apache.poi"     % "poi"             % "5.4.1",
-      "org.apache.poi"     % "poi-ooxml"       % "5.4.1",
-      "org.scalatest"     %% "scalatest"       % "3.2.19"   % Test,
-      "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0" % Test
-    )
+      "org.apache.poi" % "poi"       % "5.4.1",
+      "org.apache.poi" % "poi-ooxml" % "5.4.1"
+    ) ++ testDependencies
   )
   .dependsOn(core)
 
 lazy val `scala-excel` = project
   .in(file("."))
-  .aggregate(model, xcel)
+  .aggregate(model, core, xcel)
   .settings(
     name           := "scala-xcel",
     publish / skip := true,
@@ -57,6 +53,11 @@ lazy val scalafixSettings = Seq(
     "-feature",
     "-Wunused:unsafe-warn-patvars"
   )
+)
+
+lazy val testDependencies = Seq(
+  "org.scalatest"     %% "scalatest"       % "3.2.19"   % Test,
+  "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0" % Test
 )
 
 enablePlugins(

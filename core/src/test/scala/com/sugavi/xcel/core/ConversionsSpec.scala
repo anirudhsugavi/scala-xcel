@@ -1,4 +1,4 @@
-package com.sugavi.conversions
+package com.sugavi.xcel.core
 
 import com.sugavi.xcel.model.*
 import org.scalatest.flatspec.AnyFlatSpec
@@ -27,7 +27,7 @@ class ConversionsSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
 
         val errors = typeCheckErrors(
           """
-            |import com.sugavi.xcel.syntax.given
+            |import com.sugavi.xcel.core.syntax.given
             |
             |val strX: XcelValue      = str
             |val dobX: XcelValue      = dob

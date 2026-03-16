@@ -2,8 +2,6 @@ package com.sugavi.xcel.model
 
 import java.time.{LocalDate, LocalDateTime}
 
-class Contracts
-
 case class Sheet(
   name: String,
   header: Option[Row],
