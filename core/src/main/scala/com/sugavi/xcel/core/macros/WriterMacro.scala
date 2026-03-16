@@ -7,7 +7,7 @@ import scala.annotation.tailrec
 import scala.language.implicitConversions
 import scala.quoted.*
 
-object WriterMacros:
+object WriterMacro:
 
   inline def deriveSheet[A](records: Seq[A]): Sheet = ${ deriveSheetImpl('records) }
 
