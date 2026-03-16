@@ -1,4 +1,4 @@
-package com.sugavi.xcel
+package com.sugavi.xcel.core
 
 import com.sugavi.xcel.model.XcelValue
 

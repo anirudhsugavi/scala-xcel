@@ -15,6 +15,18 @@ lazy val model = project
   .settings(scalafixSettings)
   .settings(name := "model")
 
+lazy val core = project
+  .in(file("core"))
+  .settings(scalafixSettings)
+  .settings(
+    name := "core",
+    libraryDependencies ++= Seq(
+      "org.scalatest"     %% "scalatest"       % "3.2.19"   % Test,
+      "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0" % Test
+    )
+  )
+  .dependsOn(model)
+
 lazy val xcel = project
   .in(file("xcel"))
   .settings(scalafixSettings)
@@ -25,9 +37,9 @@ lazy val xcel = project
       "org.apache.poi"     % "poi-ooxml"       % "5.4.1",
       "org.scalatest"     %% "scalatest"       % "3.2.19"   % Test,
       "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0" % Test
-    ),
+    )
   )
-  .dependsOn(model)
+  .dependsOn(core)
 
 lazy val `scala-excel` = project
   .in(file("."))
@@ -35,7 +47,7 @@ lazy val `scala-excel` = project
   .settings(
     name           := "scala-xcel",
     publish / skip := true,
-    Test / fork    := !isDebug,
+    Test / fork    := !isDebug
   )
 
 lazy val scalafixSettings = Seq(
@@ -43,13 +55,13 @@ lazy val scalafixSettings = Seq(
   scalacOptions ++= Seq(
     "-Wall",
     "-feature",
-    "-Wunused:unsafe-warn-patvars",
+    "-Wunused:unsafe-warn-patvars"
   )
 )
 
 enablePlugins(
   ScalafmtPlugin,
-  ScalafixPlugin,
+  ScalafixPlugin
 )
 
 def isDebug: Boolean = ManagementFactory.getRuntimeMXBean.getInputArguments.contains("-Xdebug")

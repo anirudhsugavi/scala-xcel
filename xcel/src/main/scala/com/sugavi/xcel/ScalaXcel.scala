@@ -1,6 +1,6 @@
 package com.sugavi.xcel
 
-import com.sugavi.xcel.mappers.Mappers
+import com.sugavi.xcel.core.macros.WriterMacros
 import com.sugavi.xcel.model.Sheet
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -15,10 +15,10 @@ object ScalaXcel extends ScalaXcel:
     records: Seq[A],
     options: XcelOptions = XcelOptions.Default
   ): XSSFWorkbook =
-    Mappers
+    WriterMacros
       .deriveSheet(records)
       .pipe(applySheetOptions(_, options))
-      .pipe(sh => XSSFXcelHandler.toXSSFWorkbook(Seq(sh), options))
+      .pipe(sh => XSSFXcelWriter.toXSSFWorkbook(Seq(sh), options))
 
   override inline def toExcelWorkbookFuture[A](records: Seq[A], options: XcelOptions = XcelOptions.Default)(
     using ec: ExecutionContext

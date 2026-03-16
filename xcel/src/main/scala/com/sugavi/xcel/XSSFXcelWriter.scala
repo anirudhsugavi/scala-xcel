@@ -4,7 +4,7 @@ import com.sugavi.xcel.model.*
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFWorkbook}
 
-object XSSFXcelHandler:
+object XSSFXcelWriter:
 
   def toXSSFWorkbook(sheets: Seq[Sheet], options: XcelOptions = XcelOptions.Default): XSSFWorkbook =
     val workbook = new XSSFWorkbook()

@@ -1,4 +1,4 @@
-package com.sugavi.xcel.mappers
+package com.sugavi.xcel.core.macros
 
 import com.sugavi.xcel.model.*
 
@@ -7,13 +7,13 @@ import scala.annotation.tailrec
 import scala.language.implicitConversions
 import scala.quoted.*
 
-object Mappers:
+object WriterMacros:
 
   inline def deriveSheet[A](records: Seq[A]): Sheet = ${ deriveSheetImpl('records) }
 
   private def deriveSheetImpl[A: Type](recordsExpr: Expr[Seq[A]])(using Quotes): Expr[Sheet] =
     import quotes.reflect.*
-    import com.sugavi.xcel.syntax.given
+    import com.sugavi.xcel.core.syntax.given
 
     val tpe           = TypeRepr.of[A]
     val sym           = tpe.typeSymbol
